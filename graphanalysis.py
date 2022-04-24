@@ -48,7 +48,7 @@ class CausalityAnalysis:
     def getDescriptiveStatistics(self):
         print(self.df.describe())
 
-interventions = ["98_observational","30_A0","30_B0.16","30_C0","30_D0","30_E0","50_F-0.5"]
+interventions = ["98_observational","30_A0","30_B0","30_B0.16","30_C0","30_D0","30_E0","50_F-0.5"]
 
 mean_df = pd.DataFrame(np.zeros((len(interventions),6)))
     
