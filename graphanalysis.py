@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from statistics import covariance, mean
 import pandas as pd
 import seaborn as sns
+import scipy.stats as st
 from bayesianfunctions import getGP_plot
 
 torch.set_default_tensor_type(torch.FloatTensor)
@@ -73,14 +74,29 @@ for intervention in interventions:
 
 print(var_df)
 
-
+"""
 for intervention in interventions:
     ca = CausalityAnalysis(intervention)
     ca.getScatterplots()
 
 #corM(df, 'spearman')
+"""
 
+corr_df = pd.DataFrame(np.zeros((len(interventions),6)))
+    
+corr_df.index = interventions
 
+corr_df.columns = ["A","B","C","D","E","F"]
+
+for intervention in interventions[1:]:
+    ca1 = CausalityAnalysis(intervention)
+    ca2 = CausalityAnalysis(interventions[0])
+
+    for v in ["A","B","C","D","E","F"]:
+        _, pval = st.ttest_ind(ca1.df[v],ca2.df[v])
+        corr_df.loc[intervention,v] = pval
+
+print(corr_df)
 
 
 
