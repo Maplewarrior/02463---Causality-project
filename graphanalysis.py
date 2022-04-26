@@ -66,7 +66,7 @@ for intervention in interventions:
     ca = CausalityAnalysis(intervention)
     mean_df.loc[intervention,:] = ca.getVariableMeans()
 
-print(mean_df)
+#print(mean_df)
 
 var_df = pd.DataFrame(np.zeros((len(interventions),6)))
     
@@ -78,7 +78,7 @@ for intervention in interventions:
     ca = CausalityAnalysis(intervention)
     var_df.loc[intervention,:] = ca.getVariableVariances()
 
-print(var_df)
+#print(var_df)
 
 """
 for intervention in interventions:
@@ -102,10 +102,11 @@ for intervention in interventions[1:]:
         _, pval = st.ttest_ind(ca1.df[v],ca2.df[v])
         corr_df.loc[intervention,v] = pval
 
-print(corr_df)
+#print(corr_df)
 
 #ca = CausalityAnalysis("30_F0")
 #ca.getScatterplots()
 
-ca = CausalityAnalysis("50_F-0.5")
-ca.getScatterplot("F","A")
+#ca = CausalityAnalysis("50_F-0.5")
+#ca.getScatterplot("A","F")
+

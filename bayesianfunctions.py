@@ -6,6 +6,8 @@ from torch import nn, distributions
 from scipy.spatial.distance import cdist
 from scipy.stats import norm
 import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 torch.set_default_tensor_type(torch.FloatTensor)
 
@@ -126,30 +128,36 @@ def optimize_GP_hyperparams(Xtrain, ytrain, optimization_steps, learning_rate, m
 # solution to BayesianOptimization Exercise 3
 
 # this function will plot var2 as a function of var1
-def getGP_plot(var1, var2, filename):
-    # exclude first column from dataframe (rownumbers)
-    df = pd.read_csv('data/'+str(filename)).iloc[:,1:]
-
-    # training set size
-    train_size = 10
+def getGP_plot(var1, var2, df):
     # split data into train and test set
-    X = np.array(df['A'])
-    y = np.array(df['F'])
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=42)
+    Xtrain = np.array(df[var1][:5]).reshape(-1,1)
+    ytrain = np.array(df[var2][:5]).reshape(-1,1)
+
+    Xtrain = (Xtrain - np.mean(Xtrain)) / np.std(Xtrain)
+    ytrain = (ytrain - np.mean(ytrain)) / np.std(ytrain)
+    
+    # and plot it
+    plt.plot(Xtrain, ytrain, 'o', color='black')
+    plt.ylabel('Normalized level of precipitations')
+    plt.xlabel('Time')
+    plt.show()
 
     ## mean and variance of the log-normal distribution for the lengthscale prior 
-    prior_mean = 0.
-    prior_std = 3.
+    prior_mean = np.mean(Xtrain.flatten())
+    prior_std = np.std(Xtrain.flatten())
     
     # bayesian optimization parameters
     optimization_steps = 500
     learning_rate = 5e-3
 
+    Xtest = np.array(df[var1][5:]).reshape(-1,1)
+    
     # get optimal hyperparameters from bayesian optimization
-    lengthscale, output_var, noise_var = optimize_GP_hyperparams(Xtrain, ytrain, optimization_steps, learning_rate, prior_mean, prior_std)
+    lengthscale, output_var, noise_var = optimize_GP_hyperparams(Xtrain, ytrain, 50, 1e-2, prior_mean, prior_std)
+    print('Optimized parameters:', lengthscale, output_var, noise_var)
 
-    # predict function from gaussian process
-    mu, covariance = fit_predictive_GP(Xtrain, ytrain, Xtest, lengthscale, optimization_steps, learning_rate)
+    # we can fit the GP that use the hyperparameters found above
+    mu, covariance = fit_predictive_GP(Xtrain, ytrain, Xtest, lengthscale, output_var, noise_var)
     std = np.sqrt(np.diag(covariance))
     plt.plot(Xtrain, ytrain, 'ro', label='Training points')
     plt.gca().fill_between(Xtest.flat, mu.reshape(-1) - 2 * std, mu.reshape(-1) + 2 * std,  color='lightblue', alpha=0.5, label=r"$2\sigma$")
